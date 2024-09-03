@@ -10,11 +10,12 @@ const DatabaseConfig = require("./config/MongooseDbConfig");
  app.use(bodyParser.json());
 app.use(cors())
 
-const registerUserRoute = require('./features/userRegistration/route/UserRegistrationRoute')
+const registerUserRouter = require('./features/userRegistration/route/UserRegistrationRoute')
+ const loginUserRouter = require('./features/userLogin/route/userLoginRoute')
 
 
-
-app.use('/api/v1/user',registerUserRoute)
+app.use('/api/v1/user',registerUserRouter)
+app.use('/api/v1/user',loginUserRouter)
  app.get('/',(req,res)=>{
      res.status(200).json({
         message:"hello message"

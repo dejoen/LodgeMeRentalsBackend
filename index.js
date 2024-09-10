@@ -6,6 +6,20 @@ const DatabaseConfig = require("./config/MongooseDbConfig");
 
  const app = express()
 
+const server = require("http").Server(app);
+const { Server } = require("socket.io");
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+const chatSocket = io.of("/chat");
+
+require('./features/chat/socketInitialization')(chatSocket)
+
+
+
  app.use(bodyParser.urlencoded({ extended: false }))
  app.use(bodyParser.json());
 app.use(cors())
@@ -31,7 +45,7 @@ app.use('/api/v1/user',loginUserRouter)
 
    DatabaseConfig().then((err)=>{
     
-       app.listen(3040, () => {
+       server.listen(3040, () => {
            console.log(`Server started on port 3040`);
         });
 }).catch(err=>{

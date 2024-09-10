@@ -34,7 +34,7 @@
   const hashedPassword = await passwordHasher.hash(userPassword,salt)
 
   const user = new UsersModel({
-    accountType,userName,userEmail,userPhoneNumber,userPassword:hashedPassword
+    accountType,userName,userEmail,userPhoneNumber,userPassword:hashedPassword,timeCreated:Date.now()
   })
 
   await user.save()

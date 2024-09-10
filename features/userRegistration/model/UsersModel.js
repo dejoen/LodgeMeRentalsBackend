@@ -32,6 +32,14 @@ const moongoose = require('mongoose')
       userSocketConnectionId:{
         type:String,
         default:''
+      },
+      timeCreated:{
+        type:Date,
+        default:null
+      },
+      isAgentVerified:{
+        type:Boolean,
+        default:false
       }
   })
 

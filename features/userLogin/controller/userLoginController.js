@@ -4,6 +4,7 @@ const UsersModel =  require('../../userRegistration/model/UsersModel')
 
 const verifyPassword = require('bcryptjs')
 const tokenSigner = require('jsonwebtoken')
+const UploadFile = require('../../../utils/UploadFile')
 
 
 const LoginUser = async (req,res) => {
@@ -69,8 +70,19 @@ const LoginUser = async (req,res) => {
 
 const uploadAgentFileForVerification = async (req,res,next) =>{
     const  {verificationDocument}  = req.body
-  const user = UsersModel.findOne(req.user._id)
+  const user = UsersModel.findOne({_id:req.user._id})
    console.log(verificationDocument)
+     if(user.isAgentFileAlreadyUploaded){
+        res.status(403).json({
+            title:"Agent Verification Message",
+            status:403,
+            successfull:false,
+            message:'File already uploaded please wait while we review your document'
+ 
+          })
+ 
+          return 
+     }
     if(!verificationDocument){
          res.status(403).json({
            title:"Agent Verification Message",
@@ -129,8 +141,9 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
        const  documentOne = await UploadFile(verificationDocument[0],folderPath)
         const documentTwo = await UploadFile(verificationDocument[1],folderPath)
    
-         Promise.all([documentOne,documentTwo]).then((result) => {
+         Promise.all([documentOne,documentTwo]).then(async(result) => {
              console.log(result)
+              await user.updateOne({isAgentFileAlreadyUploaded:true})
              res.status(200).json({
                title:"Agent Verification Message",
                status:200,
@@ -159,6 +172,19 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
     
 }
 
+const verifyUserByToken = async (req,res)=>{
+     const user = await UsersModel.findOne({_id:req.user._id})
+     res.status(200).json({
+        title:"User Detail Meessage",
+        status:200,
+        successfull:true,
+        user:{
+            ...user._doc,
+            
+        
+        }
+     })
+}
 
 
-module.exports = {LoginUser,uploadAgentFileForVerification}
+module.exports = {LoginUser,uploadAgentFileForVerification,verifyUserByToken}

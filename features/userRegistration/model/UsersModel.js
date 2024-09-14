@@ -40,6 +40,10 @@ const moongoose = require('mongoose')
       isAgentVerified:{
         type:Boolean,
         default:false
+      },
+      isAgentFileAlreadyUploaded:{
+        type:Boolean,
+        default:false
       }
   })
 

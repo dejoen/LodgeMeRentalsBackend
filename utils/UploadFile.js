@@ -1,5 +1,5 @@
   const {Readable} = require('stream')
-   const {fireStorage} = require('../config/Firebase/FirebaseConfig') 
+   const {fireStorage} = require('../config/FirebaseConfig') 
 module.exports = async (file,folderPath) => {
    return new Promise((resolve,reject)=>{
       if(!file){

@@ -174,15 +174,12 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
 
 const verifyUserByToken = async (req,res)=>{
      const user = await UsersModel.findOne({_id:req.user._id})
+     console.log(user)
      res.status(200).json({
         title:"User Detail Meessage",
         status:200,
         successfull:true,
-        user:{
-            ...user._doc,
-            
-        
-        }
+        user
      })
 }
 

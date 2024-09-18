@@ -6,8 +6,7 @@ const moongoose = require('mongoose')
       
       accountType:{
         type:String,
-        unique:true,
-        required:[true,'you need to fill the account type details']
+      
       },
       userName:{
         type:String,

@@ -7,9 +7,9 @@
     const {accountType, userName, userEmail,userPhoneNumber,userPassword} = req.body
 
       if(!accountType || !userName || !userEmail || !userPhoneNumber || !userPassword){
-          res.status(403).json({
+          res.status(400).json({
             title:'LodgeMe Registration Message',
-            status:403,
+            status:400,
             successfull:false,
             message:"accountType,userName,userEmail,userPhoneNumber and userPassword fields are required to continue."
           })
@@ -20,9 +20,9 @@
       const isUserAlreadyRegistered = await UsersModel.findOne({userEmail})
     
       if(isUserAlreadyRegistered){
-        res.status(403).json({
+        res.status(400).json({
           title:'LodgeMe Registration Message',
-          status:403,
+          status:400,
           successfull:false,
           message:`An account is already created with email= ${userEmail}  please change email.`
         })

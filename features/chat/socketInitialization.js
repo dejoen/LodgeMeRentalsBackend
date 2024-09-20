@@ -41,16 +41,18 @@ module.exports = async (chatSocket) =>{
               next()
         })
      }).on('connection',async(socket)=>{
-          socket.emit('socketConnected','active')
-      console.log('connected successfully.')
-      socket.on('hello', d=>console.log(d))
+          
+      
 
          const user = await UsersModel.findOne({_id:socket.user._id})
           if(user){
             await user.updateOne({userSocketConnectionId:socket.id,isOnline:true})
           }
-
-          console.log( await UsersModel.findOne({_id:socket.user._id}))
+          const connectedUser = await UsersModel.findOne({_id:socket.user._id})
+          socket.emit('socketConnected',connectedUser)
+          console.log('connected successfully.')
+      socket.on('hello', d=>console.log(d))
+          console.log( connectedUser)
           socket.on('disconnect',async ()=>{
             await user.updateOne({isOnline:false})
             console.log('disconnected')

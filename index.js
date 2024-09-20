@@ -25,7 +25,8 @@ require('./features/chat/socketInitialization')(chatSocket)
 app.use(cors())
 
 const registerUserRouter = require('./features/userRegistration/route/UserRegistrationRoute')
- const loginUserRouter = require('./features/userLogin/route/userLoginRoute')
+ const loginUserRouter = require('./features/userLogin/route/userLoginRoute');
+const UsersModel = require("./features/userRegistration/model/UsersModel");
 
 
 app.use('/api/v1/user',registerUserRouter)
@@ -43,8 +44,8 @@ app.use('/api/v1/user',loginUserRouter)
      })
  })
 
-   DatabaseConfig().then((err)=>{
-    
+   DatabaseConfig().then( async(err)=>{
+   //await UsersModel.deleteMany()
        server.listen(3040, () => {
            console.log(`Server started on port 3040`);
         });

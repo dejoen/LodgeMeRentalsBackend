@@ -21,7 +21,7 @@ const LoginUser = async (req,res) => {
     }
 
     try {
-        const user = await   UsersModel.findOne({userEmail},{userSocketConnectionId:0})
+        const user = await   UsersModel.findOne({userEmail})
         if(!user){
             res.status(403).json({
                 title:"LodgeMe Login Message",
@@ -41,17 +41,39 @@ const LoginUser = async (req,res) => {
             }) 
             return
          }
-         const token = await tokenSigner.sign(user._doc,process.env.SECRET_KEY,{expiresIn:'30d'})
-         res.status(200).json({
-            title:"LodgeMe Login Message",
-            status:200,
-            successfull:true,
-            message:"Successfully Logged in to LodgeMe. Welcome back.",
-            user:{
-                ...user._doc,
-                token
-            }
-        }) 
+         await user.updateOne({isOnline:true})
+         const token =  tokenSigner.sign(user._doc,process.env.SECRET_KEY,{expiresIn:'30d'})
+         
+         if(user.accountType ==="agent"){
+            const {isAgentFileAlreadyUploaded,isAgentVerified,...newData} = user._doc
+
+               res.status(200).json({
+               title:"LodgeMe Login Message",
+               status:200,
+               successfull:true,
+               message:"Successfully Logged in to LodgeMe. Welcome back.",
+               user:{
+                   ...newData,
+                   token
+               }
+           }) 
+           return
+         }
+
+           const {isAgentFileAlreadyUploaded,isAgentVerified,userSocketConnectionId,...newData} = user._doc
+
+               res.status(200).json({
+               title:"LodgeMe Login Message",
+               status:200,
+               successfull:true,
+               message:"Successfully Logged in to LodgeMe. Welcome back.",
+               user:{
+                   ...newData,
+                   token
+               }
+           }) 
+        
+       
 
     } catch (error) {
 
@@ -70,7 +92,7 @@ const LoginUser = async (req,res) => {
 
 const uploadAgentFileForVerification = async (req,res,next) =>{
     const  {verificationDocument}  = req.body
-  const user = UsersModel.findOne({_id:req.user._id})
+  const user = await UsersModel.findOne({_id:req.user._id})
    console.log(verificationDocument)
      if(user.isAgentFileAlreadyUploaded){
         res.status(403).json({
@@ -144,11 +166,13 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
          Promise.all([documentOne,documentTwo]).then(async(result) => {
              console.log(result)
               await user.updateOne({isAgentFileAlreadyUploaded:true})
+             
              res.status(200).json({
                title:"Agent Verification Message",
                status:200,
                successfull:true,
-               message:'Successfully uploaded image.'
+               message:'Successfully uploaded image.',
+               user
    
              })
          }).catch((err) => {
@@ -174,6 +198,7 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
 
 const verifyUserByToken = async (req,res)=>{
      const user = await UsersModel.findOne({_id:req.user._id})
+     console.log('verification')
      console.log(user)
      res.status(200).json({
         title:"User Detail Meessage",

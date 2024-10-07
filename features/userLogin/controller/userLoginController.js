@@ -45,7 +45,7 @@ const LoginUser = async (req,res) => {
          const token =  tokenSigner.sign(user._doc,process.env.SECRET_KEY,{expiresIn:'30d'})
          
          if(user.accountType ==="agent"){
-            const {isAgentFileAlreadyUploaded,isAgentVerified,...newData} = user._doc
+            const {...newData} = user._doc
 
                res.status(200).json({
                title:"LodgeMe Login Message",

@@ -27,10 +27,12 @@ app.use(cors())
 const registerUserRouter = require('./features/userRegistration/route/UserRegistrationRoute')
  const loginUserRouter = require('./features/userLogin/route/userLoginRoute');
 const UsersModel = require("./features/userRegistration/model/UsersModel");
+const publishHouseRouter = require('./features/agent/publishHouse/route/publishHouseRoute')
 
 
 app.use('/api/v1/user',registerUserRouter)
 app.use('/api/v1/user',loginUserRouter)
+app.use('/api/v1/user',publishHouseRouter)
  app.get('/',(req,res)=>{
      res.status(200).json({
         message:"hello message"
@@ -45,7 +47,7 @@ app.use('/api/v1/user',loginUserRouter)
  })
 
    DatabaseConfig().then( async(err)=>{
-   //await UsersModel.deleteMany()
+   //await UsersModel.deleteMany()@    
        server.listen(3040, () => {
            console.log(`Server started on port 3040`);
         });

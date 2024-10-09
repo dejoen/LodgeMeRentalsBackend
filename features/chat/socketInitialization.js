@@ -51,6 +51,8 @@ module.exports = async (chatSocket) =>{
           const connectedUser = await UsersModel.findOne({_id:socket.user._id})
           socket.emit('socketConnected',connectedUser)
           console.log('connected successfully.')
+          console.log("users:")
+          console.log(await UsersModel.find())
       socket.on('hello', d=>console.log(d))
           console.log( connectedUser)
           socket.on('disconnect',async ()=>{

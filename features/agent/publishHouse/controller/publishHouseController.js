@@ -4,7 +4,7 @@ const  publishHouseModel = require('../model/publishHouseModel')
 const uploadPublishHouseData = require('../../../../utils/publishHouseFile')
 
 const {uid} = require('uid')
-
+const lodgeUploadId = uid()
 
 
 const publishHouse = async (req,res,next) => {
@@ -154,6 +154,32 @@ const publishHouse = async (req,res,next) => {
 
 }
 
+const  getAllPublishedHouses = async (req,res,next) => {
+
+    try{
+
+        const houses = await publishHouseModel.find().sort({datePublished:-1})
+         
+        res.status(200).json({
+            title:'All Houses Published Message.',
+            status:200,
+            successfull:true,
+            message:'successfully fetched.',
+            totalHousesPublished:houses.length,
+            housesPublished:houses,
+        })
+
+    }catch(err){
+        res.status(500).json({
+            title:'All Houses Published Message.',
+            status:500,
+            successfull:true,
+            message:'An error occurred',
+             error:err.message
+        })
+    }
+}
+
 
 const checkIfDataIsBase64 = (data) => {
     var regexBase64 = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
@@ -190,7 +216,7 @@ const isDataIsNull = (data) =>{
    return  result
 }
 
-const lodgeUploadId = uid()
+
 
 const  uploadAllData = async (data,userId) =>{
     const  promises = [] 
@@ -213,4 +239,4 @@ const  uploadAllData = async (data,userId) =>{
 
 }
 
-module.exports ={publishHouse}
+module.exports ={publishHouse,getAllPublishedHouses}

@@ -1,5 +1,4 @@
 
-const LoginUserModel = require('../model/userLoginModel')
 const UsersModel =  require('../../userRegistration/model/UsersModel')
 
 const verifyPassword = require('bcryptjs')
@@ -11,11 +10,11 @@ const LoginUser = async (req,res) => {
     const {userEmail,userPassword} = req.body
 
     if(!userEmail || !userPassword){
-        res.status(403).json({
+        res.status(400).json({
             title:"LodgeMe Login Message",
-            status:403,
+            status:400,
             successfull:false,
-            message:"UserEmail and userPassword field is required to continue."
+            message:"userEmail and userPassword field is required to continue."
         })
         return
     }
@@ -23,7 +22,7 @@ const LoginUser = async (req,res) => {
     try {
         const user = await   UsersModel.findOne({userEmail})
         if(!user){
-            res.status(403).json({
+            res.status(400).json({
                 title:"LodgeMe Login Message",
                 status:403,
                 successfull:false,
@@ -33,9 +32,9 @@ const LoginUser = async (req,res) => {
         }
          const isPasswordValid = await verifyPassword.compare(userPassword,user.userPassword)
          if(!isPasswordValid){
-            res.status(403).json({
+            res.status(400).json({
                 title:"LodgeMe Login Message",
-                status:403,
+                status:400,
                 successfull:false,
                 message:"Password provided is not valid. Please provide a valid password."
             }) 
@@ -59,6 +58,9 @@ const LoginUser = async (req,res) => {
            }) 
            return
          }
+
+        
+     
 
            const {isAgentFileAlreadyUploaded,isAgentVerified,userSocketConnectionId,...newData} = user._doc
 
@@ -118,9 +120,9 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
     }
 
     if(verificationDocument.length<2){
-       res.status(403).json({
+       res.status(400).json({
          title:"Agent Verification Message",
-         status:403,
+         status:400,
          successfull:false,
          message:'Two document is needed to be submitted check and try again.'
 
@@ -132,9 +134,9 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
      if(!verificationDocument.every((document)=>{
        return document.base64 != null
     })){
-       res.status(403).json({
+       res.status(400).json({
            title:"Agent Verification Message",
-           status:403,
+           status:400,
            successfull:false,
            message:'You need base64 field to continue.'
 
@@ -147,9 +149,9 @@ const uploadAgentFileForVerification = async (req,res,next) =>{
        var regexBase64 = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
        return  regexBase64.test(document.base64)
     })){
-       res.status(403).json({
+       res.status(400).json({
            title:"Agent Verification Message",
-           status:403,
+           status:400,
            successfull:false,
            message:'Invalid base64 provided please check and try again.'
 

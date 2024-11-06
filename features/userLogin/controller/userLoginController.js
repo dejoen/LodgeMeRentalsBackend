@@ -24,7 +24,7 @@ const LoginUser = async (req,res) => {
         if(!user){
             res.status(400).json({
                 title:"LodgeMe Login Message",
-                status:403,
+                status:400,
                 successfull:false,
                 message:"UserEmail is not registered with us. Please check and try again."
             }) 
@@ -41,7 +41,7 @@ const LoginUser = async (req,res) => {
             return
          }
          await user.updateOne({isOnline:true})
-         const token =  tokenSigner.sign(user._doc,process.env.SECRET_KEY,{expiresIn:'30d'})
+         const token =  tokenSigner.sign({...user._doc},process.env.SECRET_KEY,{expiresIn:'30d'})
          
          if(user.accountType ==="agent"){
             const {...newData} = user._doc

@@ -56,7 +56,7 @@ module.exports = async (chatSocket) =>{
           socket.emit('socketConnected',connectedUser)
           console.log('connected successfully.')
           console.log("users:")
-          console.log(await UsersModel.find())
+         // console.log(await UsersModel.find())
 
 
           socket.on('fetch-published-house',d=>{

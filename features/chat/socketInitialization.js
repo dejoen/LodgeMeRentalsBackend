@@ -2,6 +2,8 @@
 
  const UsersModel = require('../../features/userRegistration/model/UsersModel')
 
+ const UserPublishedHouses = require('../../features/agent/publishHouse/model/publishHouseModel')
+
 module.exports = async (chatSocket) =>{
      chatSocket.use(async(socket,next)=>{
          
@@ -49,10 +51,24 @@ module.exports = async (chatSocket) =>{
             await user.updateOne({userSocketConnectionId:socket.id,isOnline:true})
           }
           const connectedUser = await UsersModel.findOne({_id:socket.user._id})
+      const houses = await UserPublishedHouses.find({publisher:socket.user._id})
+
           socket.emit('socketConnected',connectedUser)
           console.log('connected successfully.')
           console.log("users:")
           console.log(await UsersModel.find())
+
+
+          socket.on('fetch-published-house',d=>{
+            console.log(d)
+            
+             socket.emit('published-houses',JSON.stringify(houses))
+          })
+
+          socket.on('user',()=>{
+            socket.emit('userData',connectedUser)
+          })
+          
       socket.on('hello', d=>console.log(d))
           console.log( connectedUser)
           socket.on('disconnect',async ()=>{

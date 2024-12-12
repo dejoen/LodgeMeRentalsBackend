@@ -11,6 +11,7 @@
       userPassword:{
         type:String
       },
+     
  })
 
  module.exports = mongoose.model('LoginUser',LoginUserSchema)

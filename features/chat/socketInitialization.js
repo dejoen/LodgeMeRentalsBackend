@@ -72,6 +72,7 @@ module.exports = async (chatSocket) =>{
       socket.on('hello', d=>console.log(d))
           console.log( connectedUser)
           socket.on('disconnect',async ()=>{
+            if(user)
             await user.updateOne({isOnline:false})
             console.log('disconnected')
             console.log( await UsersModel.findOne({_id:socket.user._id}))

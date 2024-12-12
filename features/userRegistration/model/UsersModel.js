@@ -43,6 +43,52 @@ const moongoose = require('mongoose')
       isAgentFileAlreadyUploaded:{
         type:Boolean,
         default:false
+      },
+      userProfile:{
+        firstName:{
+          type:String,
+          default:''
+        },
+        lastName:{
+          type:String,
+          default:''
+        },
+        profileImage:{
+          type:String,
+          default:''
+        },
+        coverImage:{
+          type:String,
+          default:''
+        },
+        country:{
+          type:String,
+          default:''
+        },
+        state:{
+          type:String,
+          default:''
+        },
+        localGovt:{
+          type:String,
+          default:''
+        },
+        gender:{
+          type:String,
+          default:''
+        },
+        postalCode:{
+          type:String,
+          default:''
+        },
+        language:{
+          type:String,
+          default:''
+        },
+        about:{
+          type:String,
+          default:''
+        }
       }
   })
 

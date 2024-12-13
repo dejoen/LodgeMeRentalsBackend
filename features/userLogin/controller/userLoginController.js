@@ -5,6 +5,7 @@ const tokenSigner = require("jsonwebtoken");
 const UploadFile = require("../../../utils/UploadFile");
 const ValidateBaseBase64String = require("../../../utils/ValidateBaseBase64String");
 const UploadImage = require("../../../utils/UploadImage");
+const {uid }= require('uid')
 
 const LoginUser = async (req, res) => {
   const { userEmail, userPassword } = req.body;
@@ -288,14 +289,18 @@ const updateAgentProfile = async (req, res, next) => {
     }
 
     if (coverImage && profileImage) {
+       
+       const oldProfile = user.userProfile.profileImage.split('/')[1]
+       const oldCoverImage = user.userProfile.coverImage.split('/')[1]
+       console.log(oldProfile)
       Promise.all([
         await UploadImage(
           coverImage,
-          `CoverImages/${req.user._id}/coverImage.jpeg`
+          `CoverImages/${req.user._id}/${uid(16)}.jpeg`,oldCoverImage
         ),
         await UploadImage(
           profileImage,
-          `ProfileImages/${req.user._id}/profileImage.jpeg`
+          `ProfileImages/${req.user._id}/${uid(16)}.jpeg`,oldProfile
         )
       ])
         .then(async result => {
@@ -335,18 +340,27 @@ const updateAgentProfile = async (req, res, next) => {
         .catch(err => {
           next(err);
         });
-    } else if (coverImage) {
-      UploadImage(coverImage, `CoverImages/${req.user._id}/coverImage.jpeg`)
-        .then(async result => {
-          console.log(result);
 
+
+
+    } else if (coverImage) {
+
+  
+      const oldCoverImage = user.userProfile.coverImage.split('/')[1]
+
+     UploadImage(
+          coverImage,
+          `CoverImages/${req.user._id}/${uid(16)}.jpeg`,oldCoverImage
+        ).then(async result => {
+          console.log(result);
+  console.log('success')
           await user.updateOne({
             userName: userName ? userName : user.userName,
             userProfile: {
               ...user.userProfile,
               firstName: firstName ? firstName : user.userProfile.firstName,
               lastName: lastName ? lastName : user.userProfile.lastName,
-              coverImage: result ? result : user.userProfile.coverImage,
+              coverImage: (result) ? result : user.userProfile.coverImage,
               country: country ? country : user.userProfile.country,
               state: state ? state : user.userProfile.state,
               localGovt: localGovt ? localGovt : user.userProfile.localGovt,
@@ -358,10 +372,10 @@ const updateAgentProfile = async (req, res, next) => {
                 ? publishingAs
                 : user.userProfile.publishingAs
             }
-          });
+          })
 
           const updateUser = await UsersModel.findOne({ _id: req.user._id });
-
+  console.log(updateUser.userProfile.coverImage)
           res.status(200).json({
             title: "Update Agent Profile Message",
             status: 200,
@@ -374,10 +388,14 @@ const updateAgentProfile = async (req, res, next) => {
         .catch(err => {
           next(err);
         });
+
+
     } else if(profileImage) {
+      const oldProfile = user.userProfile.profileImage.split('/')[1]
+
       UploadImage(
         profileImage,
-        `ProfileImages/${req.user._id}/profileImage.jpeg`
+        `ProfileImages/${req.user._id}/${uid(16)}.jpeg`,oldProfile
       )
         .then(async result => {
           console.log(result);

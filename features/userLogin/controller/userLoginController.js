@@ -193,7 +193,7 @@ const uploadAgentFileForVerification = async (req, res, next) => {
   }
 };
 
-const verifyUserByToken = async (req, res,next) => {
+const verifyUserByToken = async (req, res, next) => {
   const user = await UsersModel.findOne({ _id: req.user._id });
   console.log("verification");
   console.log(user);
@@ -205,12 +205,17 @@ const verifyUserByToken = async (req, res,next) => {
   });
 };
 
-const updateAgentProfile = async (req, res,next) => {
+
+
+
+const updateAgentProfile = async (req, res, next) => {
   const user = await UsersModel.findOne({ _id: req.user._id });
-  console.log(req.body)
+  console.log(req.body);
   const {
     firstName,
     lastName,
+    userName,
+    publishingAs,
     profileImage,
     coverImage,
     email,
@@ -225,6 +230,8 @@ const updateAgentProfile = async (req, res,next) => {
 
   if (
     !firstName &&
+    !userName &&
+    !publishingAs &&
     !lastName &&
     !profileImage &&
     !coverImage &&
@@ -242,112 +249,211 @@ const updateAgentProfile = async (req, res,next) => {
       status: 400,
       successfull: false,
       message:
-        "Either firstName,lastName,profileImage,coverImage,email,country,state,localGovt,gender,postalCode,language,about fields is needed to continue."
+        "Either firstName,lastName userName,publishingAs,profileImage,coverImage,email,country,state,localGovt,gender,postalCode,language,about fields is needed to continue."
     });
     return;
   }
 
-  try{
-    if(profileImage){
 
-  const isprofileImageBase64 = ValidateBaseBase64String(profileImage);
 
-     if(!isprofileImageBase64){
+
+
+  try {
+    if (profileImage) {
+      const isprofileImageBase64 = ValidateBaseBase64String(profileImage);
+
+      if (!isprofileImageBase64) {
         res.status(400).json({
+          title: "Update Agent Profile Message",
+          status: 400,
+          successfull: false,
+          message: "Invalid base 64 string provided for profileImage"
+        });
+        return;
+      }
+    }
+
+    if (coverImage) {
+      const isCoverImageBase64 = ValidateBaseBase64String(coverImage);
+
+      if (!isCoverImageBase64) {
+        res.status(400).json({
+          title: "Update Agent Profile Message",
+          status: 400,
+          successfull: false,
+          message: "Invalid base 64 string provided for coverImage"
+        });
+        return;
+      }
+    }
+
+    if (coverImage && profileImage) {
+      Promise.all([
+        await UploadImage(
+          coverImage,
+          `CoverImages/${req.user._id}/coverImage.jpeg`
+        ),
+        await UploadImage(
+          profileImage,
+          `ProfileImages/${req.user._id}/profileImage.jpeg`
+        )
+      ])
+        .then(async result => {
+          await user.updateOne({
+            userName: userName ? userName : user.userName,
+            userProfile: {
+              ...user.userProfile,
+              firstName: firstName ? firstName : user.userProfile.firstName,
+              lastName: lastName ? lastName : user.userProfile.lastName,
+              profileImage: result[1]
+                ? result[1]
+                : user.userProfile.profileImage,
+              coverImage: result[0] ? result[0] : user.userProfile.coverImage,
+              country: country ? country : user.userProfile.country,
+              state: state ? state : user.userProfile.state,
+              localGovt: localGovt ? localGovt : user.userProfile.localGovt,
+              gender: gender ? gender : user.userProfile.gender,
+              postalCode: postalCode ? postalCode : user.userProfile.postalCode,
+              language: language ? language : user.userProfile.language,
+              about: about ? about : user.userProfile.about,
+              publishingAs: publishingAs
+                ? publishingAs
+                : user.userProfile.publishingAs
+            }
+          });
+
+          const updateUser = await UsersModel.findOne({ _id: req.user._id });
+
+          res.status(200).json({
             title: "Update Agent Profile Message",
-            status: 400,
-            successfull: false,
-            message:
-              "Invalid base 64 string provided for profileImage"
+            status: 200,
+            successfull: true,
+            message: "Updated profile successfully.",
+            user: updateUser
+          });
+        })
+        .catch(err => {
+          next(err);
+        });
+    } else if (coverImage) {
+      UploadImage(coverImage, `CoverImages/${req.user._id}/coverImage.jpeg`)
+        .then(async result => {
+          console.log(result);
+
+          await user.updateOne({
+            userName: userName ? userName : user.userName,
+            userProfile: {
+              ...user.userProfile,
+              firstName: firstName ? firstName : user.userProfile.firstName,
+              lastName: lastName ? lastName : user.userProfile.lastName,
+              coverImage: result ? result : user.userProfile.coverImage,
+              country: country ? country : user.userProfile.country,
+              state: state ? state : user.userProfile.state,
+              localGovt: localGovt ? localGovt : user.userProfile.localGovt,
+              gender: gender ? gender : user.userProfile.gender,
+              postalCode: postalCode ? postalCode : user.userProfile.postalCode,
+              language: language ? language : user.userProfile.language,
+              about: about ? about : user.userProfile.about,
+              publishingAs: publishingAs
+                ? publishingAs
+                : user.userProfile.publishingAs
+            }
+          });
+
+          const updateUser = await UsersModel.findOne({ _id: req.user._id });
+
+          res.status(200).json({
+            title: "Update Agent Profile Message",
+            status: 200,
+            successfull: true,
+            message: "Updated profile successfully.",
+            user: updateUser
           });
           return;
-     }
+        })
+        .catch(err => {
+          next(err);
+        });
+    } else if(profileImage) {
+      UploadImage(
+        profileImage,
+        `ProfileImages/${req.user._id}/profileImage.jpeg`
+      )
+        .then(async result => {
+          console.log(result);
 
+          await user.updateOne({
+            userName: userName ? userName : user.userName,
+            userProfile: {
+              ...user.userProfile,
+              firstName: firstName ? firstName : user.userProfile.firstName,
+              lastName: lastName ? lastName : user.userProfile.lastName,
+              profileImage: result ? result : user.userProfile.profileImage,
+              country: country ? country : user.userProfile.country,
+              state: state ? state : user.userProfile.state,
+              localGovt: localGovt ? localGovt : user.userProfile.localGovt,
+              gender: gender ? gender : user.userProfile.gender,
+              postalCode: postalCode ? postalCode : user.userProfile.postalCode,
+              language: language ? language : user.userProfile.language,
+              about: about ? about : user.userProfile.about,
+              publishingAs: publishingAs
+                ? publishingAs
+                : user.userProfile.publishingAs
+            }
+          });
+
+          const updateUser = await UsersModel.findOne({ _id: req.user._id });
+
+          res.status(200).json({
+            title: "Update Agent Profile Message",
+            status: 200,
+            successfull: true,
+            message: "Updated profile successfully.",
+            user: updateUser
+          });
+          return;
+        })
+        .catch(err => {
+          next(err);
+        });
+    }else{
+
+      await user.updateOne({
+        userName: userName ? userName : user.userName,
+        userProfile: {
+          ...user.userProfile,
+          firstName: firstName ? firstName : user.userProfile.firstName,
+          lastName: lastName ? lastName : user.userProfile.lastName,
+          country: country ? country : user.userProfile.country,
+          state: state ? state : user.userProfile.state,
+          localGovt: localGovt ? localGovt : user.userProfile.localGovt,
+          gender: gender ? gender : user.userProfile.gender,
+          postalCode: postalCode ? postalCode : user.userProfile.postalCode,
+          language: language ? language : user.userProfile.language,
+          about: about ? about : user.userProfile.about,
+          publishingAs: publishingAs
+            ? publishingAs
+            : user.userProfile.publishingAs
+        }
+      });
+
+      const updateUser = await UsersModel.findOne({ _id: req.user._id });
+
+      res.status(200).json({
+        title: "Update Agent Profile Message",
+        status: 200,
+        successfull: true,
+        message: "Updated profile successfully.",
+        user: updateUser
+      });
+      
 
     }
 
-    if(coverImage){
 
-        const isCoverImageBase64 = ValidateBaseBase64String(coverImage);
-      
-           if(!isCoverImageBase64){
-              res.status(400).json({
-                  title: "Update Agent Profile Message",
-                  status: 400,
-                  successfull: false,
-                  message:
-                    "Invalid base 64 string provided for coverImage"
-                });
-                return;
-           }
-      
-      
-          }
-
-          
-          if(coverImage && profileImage){
-            
-            
-
-            Promise.all([await UploadImage(coverImage,`CoverImages/${req.user._id}/coverImage.jpeg`),await UploadImage(profileImage,`ProfileImages/${req.user._id}/profileImage.jpeg`)]).then(async(result)=>{
-            
-
-            await  user.updateOne({
-                userProfile:{
-                    ...user.userProfile,
-                    firstName:(firstName)?firstName:user.userProfile.firstName,
-                    lastName:(lastName)? lastName:user.userProfile.lastName,
-                    profileImage:(result[1])? result[1]:user.userProfile.profileImage,
-                    coverImage:(result[0])? result[0]:user.userProfile.coverImage,
-                    country:(country)? country:user.userProfile.country,
-                    state:(state)? state:user.userProfile.state,
-                    localGovt:(localGovt)? localGovt:user.userProfile.localGovt,
-                    gender:(gender)? gender:user.userProfile.gender,
-                    postalCode:(postalCode)?  postalCode:user.userProfile.postalCode,
-                    language:(language)? language:user.userProfile.language,
-                    about:(about)? about:user.userProfile.about
-                }
-              })
-
-                   const updateUser = await UsersModel.findOne({_id:req.user._id})
-
-              res.status(200).json({
-                title: "Update Agent Profile Message",
-                status: 200,
-                 successfull:true,
-                 message: "Updated profile successfully.",
-                 user:updateUser
-                 
-              })
-              
-
-
-               
-
-
-            }).catch(err=>{
-                console.log(err)
-                next(err)
-            })
-           
-
-          }else if(coverImage){
-            UploadImage(coverImage,`CoverImages/${req.user._id}/coverImage.jpeg`).then(result=>{
-                console.log(result)
-              }).catch(err=>{
-                 next(err)
-              })
-              
-  
-            
-          }else{
-
-          }
-
-
-
-        }catch(err){next(err)}
- 
+  } catch (err) {
+    next(err);
+  }
 
 };
 

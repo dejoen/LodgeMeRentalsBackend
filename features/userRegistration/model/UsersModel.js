@@ -88,6 +88,11 @@ const moongoose = require('mongoose')
         about:{
           type:String,
           default:''
+        },
+       
+        publishingAs:{
+          type:String,
+          default:'Agent'
         }
       }
   })

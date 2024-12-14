@@ -51,11 +51,12 @@ module.exports = async (chatSocket) =>{
             await user.updateOne({userSocketConnectionId:socket.id,isOnline:true})
           }
           const connectedUser = await UsersModel.findOne({_id:socket.user._id})
+
       const houses = await UserPublishedHouses.find({publisher:socket.user._id})
 
           socket.emit('socketConnected',connectedUser)
           console.log('connected successfully.')
-          console.log("users:")
+          console.log(`user socket ${connectedUser.userSocketConnectionId}`)
          // console.log(await UsersModel.find())
 
 
@@ -70,12 +71,14 @@ module.exports = async (chatSocket) =>{
           })
           
       socket.on('hello', d=>console.log(d))
-          console.log( connectedUser)
+          
           socket.on('disconnect',async ()=>{
-            if(user)
+         const  user= await UsersModel.findOne({_id:socket.user._id})
             await user.updateOne({isOnline:false})
             console.log('disconnected')
-            console.log( await UsersModel.findOne({_id:socket.user._id}))
+          const disconnectedUser = await UsersModel.findOne({_id:socket.user._id})
+          console.log(disconnectedUser)
+            socket.emit('disconnected',disconnectedUser)
          })
      })
     

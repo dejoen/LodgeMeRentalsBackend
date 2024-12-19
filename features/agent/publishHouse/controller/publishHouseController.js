@@ -2,6 +2,7 @@ const publishHouseModel = require("../model/publishHouseModel");
 
 const uploadPublishHouseData = require("../../../../utils/publishHouseFile");
 
+
 const { uid } = require("uid");
 const mongoose = require("mongoose");
 const lodgeUploadId = uid();
@@ -159,7 +160,8 @@ const publishHouse = async (req, res, next) => {
 
 const getAllPublishedHouses = async (req, res, next) => {
   try {
-    const houses = await publishHouseModel.find().sort({ datePublished: -1 });
+    const houses = await publishHouseModel.find().populate('publisher',['userName','userProfile'
+    ]).sort({ datePublished: -1 });
 
     res.status(200).json({
       title: "All Houses Published Message.",
@@ -179,6 +181,14 @@ const getAllPublishedHouses = async (req, res, next) => {
     });
   }
 };
+
+
+
+
+
+
+
+
 
 const getHousesPublishedByAgent = async (req, res, next) => {
   const { publisherId } = req.body;

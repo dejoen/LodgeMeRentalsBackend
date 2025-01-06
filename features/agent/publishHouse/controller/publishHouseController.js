@@ -160,7 +160,7 @@ const publishHouse = async (req, res, next) => {
 
 const getAllPublishedHouses = async (req, res, next) => {
   try {
-    const houses = await publishHouseModel.find().populate('publisher',['userName','userProfile'
+    const houses = await publishHouseModel.find().populate('publisher',['userName','userProfile','isOnline','timeCreated'
     ]).sort({ datePublished: -1 });
 
     res.status(200).json({

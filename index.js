@@ -28,11 +28,14 @@ const registerUserRouter = require('./features/userRegistration/route/UserRegist
  const loginUserRouter = require('./features/userLogin/route/userLoginRoute');
 const UsersModel = require("./features/userRegistration/model/UsersModel");
 const publishHouseRouter = require('./features/agent/publishHouse/route/publishHouseRoute')
-
+const  messagesRouter = require("./features/chat/messaging/routes/messageRoute")
 
 app.use('/api/v1/user',registerUserRouter)
 app.use('/api/v1/user',loginUserRouter)
 app.use('/api/v1/user',publishHouseRouter)
+app.use("/api/v1/user/message",messagesRouter)
+
+
  app.get('/',(req,res)=>{
      res.status(200).json({
         message:"hello message"

@@ -3,6 +3,7 @@
  const UsersModel = require('../../features/userRegistration/model/UsersModel')
 
  const UserPublishedHouses = require('../../features/agent/publishHouse/model/publishHouseModel')
+const messageSocket = require('./messaging/controller/messageSocket')
 
 module.exports = async (chatSocket) =>{
      chatSocket.use(async(socket,next)=>{
@@ -59,6 +60,8 @@ module.exports = async (chatSocket) =>{
           console.log(`user socket ${connectedUser.userSocketConnectionId}`)
          // console.log(await UsersModel.find())
 
+
+          messageSocket(chatSocket,socket)
 
           socket.on('fetch-published-house',d=>{
             console.log(d)

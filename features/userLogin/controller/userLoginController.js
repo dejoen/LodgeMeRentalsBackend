@@ -21,7 +21,7 @@ const LoginUser = async (req, res) => {
   }
 
   try {
-    const user = await UsersModel.findOne ({userEmail});
+    let user = await UsersModel.findOne ({userEmail});
     if (!user) {
       res.status (400).json ({
         title: 'LodgeMe Login Message',

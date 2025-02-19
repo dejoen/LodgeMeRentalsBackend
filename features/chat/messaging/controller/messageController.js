@@ -9,7 +9,7 @@ const getMessages = async (req,res,next) => {
 
     const  user = req.user 
 
-    const  personUserChatted = req.body.receiverId
+    //const  personUserChatted = req.body.receiverId
 
     if(!user){
         res.status(500).json({
@@ -21,7 +21,7 @@ const getMessages = async (req,res,next) => {
         return
     }
     
-    const isReceiverIdValid = mongoose.Types.ObjectId.isValid(personUserChatted)
+   /* const isReceiverIdValid = mongoose.Types.ObjectId.isValid(personUserChatted)
 
     if(!isReceiverIdValid){
         res.status(400).json({
@@ -43,20 +43,28 @@ const getMessages = async (req,res,next) => {
             message:"Invalid receiverId provided."
         })
         return
-      }
+      }*/
 
       const messages = await MessageModel.find({
-        sender:[user._id || personUserChatted],
-        receiver:[personUserChatted || user._id]
-      })
+        
+        $or:[
+          {senderId:[user._id ],
+            },
+            {
+              receiverId:[user._id]
+            }
+        ]
 
+      }).populate(['receiverId','senderId'])
+
+      console.log(messages)
 
       res.status(200).json({
         title:"Messages of  user ",
         status:200,
         successfull:true,
         message:"Succesfully fetched.",
-        messages
+        data:messages
       })
 
 

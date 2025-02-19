@@ -6,12 +6,15 @@ const UsersModel = require("../../../userRegistration/model/UsersModel");
 
 module.exports = (generalSocket, userSocket) => {
   console.log("called...now..");
+  
+
   userSocket.on("send-message", data => {
-   
+    console.log('messages')
+    console.log(data)
     sendMessage(generalSocket, userSocket, data);
   });
 
-  userSocket.on("message-sent", data => {
+  userSocket.on("message-delivered", data => {
    // messageSent(generalSocket, userSocket);
   });
 };
@@ -57,25 +60,61 @@ const sendMessage = async (generalSocket, userSocket, data) => {
     }
 
       if(MessageType.TEXT === messageType){
+      const  userMessages = await MessageModel.findOne({
+          senderId:[senderId || receiverId],
+          receiverId:[receiverId || senderId]
+        })
+ 
+        console.log(userMessages)
+        if(userMessages){
+          const messages = userMessages.messages
+
+          messages.push({
+            messageType:messageType,
+      text:messageData,
+      timeSent:timeStamp 
+          })
+
+   await MessageModel.findByIdAndUpdate({
+    _id:userMessages._id
+   },{messages})
+
+         const newMessages = await MessageModel.findOne({
+          senderId:[senderId || receiverId],
+          receiverId:[receiverId || senderId]
+        }).populate(['senderId','receiverId'])
+        
+        
+        console.log(newMessages)
+    
+        userSocket.emit("message-sent", JSON.stringify(newMessages));
+        generalSocket.to(receiver.userSocketConnectionId).emit("message-sent",JSON.stringify(newMessages))
+
+        return 
+        }
+
 
      await new MessageModel({
-      sender:senderId,
-      receiver:receiverId,
+      senderId:senderId,
+      receiverId:receiverId,
+    messages:{
       messageType:messageType,
       text:messageData,
       timeSent:timeStamp
+    }
     }).save()
 
      
-    const messages = await MessageModel.find({
-      sender:[senderId || receiverId],
-      receiver:[receiverId || senderId]
-    })
+    const newMessages = await MessageModel.findOne({
+      senderId:[senderId || receiverId],
+      receiverId:[receiverId || senderId]
+    }).populate('senderId')
     
+    
+console.log(newMessages)
 
-
-    userSocket.emit("message-sent", JSON.stringify(messages));
-    generalSocket(receiver.userSocketConnectionId).emit("message-sent",JSON.stringify(messages))
+    userSocket.emit("message-sent", JSON.stringify(newMessages));
+    generalSocket.to(receiver.userSocketConnectionId).emit("message-sent",JSON.stringify(newMessages))
 }
 
 

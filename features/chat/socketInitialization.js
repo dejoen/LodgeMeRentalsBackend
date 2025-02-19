@@ -6,6 +6,7 @@
 const messageSocket = require('./messaging/controller/messageSocket')
 
 module.exports = async (chatSocket) =>{
+  
      chatSocket.use(async(socket,next)=>{
          
         let token = socket.handshake.auth.token || socket.handshake.headers.token

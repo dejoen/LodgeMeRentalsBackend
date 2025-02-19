@@ -475,6 +475,14 @@ const updateAgentProfile = async (req, res, next) => {
 
 };
 
+const updateClientProfile = async (req,res,next) =>{
+  const {profileImage, address,dob} = req.body
+
+  if(!profileImage || !address || !dob){
+    
+  }
+}
+
 module.exports = {
   LoginUser,
   uploadAgentFileForVerification,

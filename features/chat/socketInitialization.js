@@ -52,13 +52,25 @@ module.exports = async (chatSocket) =>{
           if(user){
             await user.updateOne({userSocketConnectionId:socket.id,isOnline:true})
           }
-          const connectedUser = await UsersModel.findOne({_id:socket.user._id})
+         
 
       const houses = await UserPublishedHouses.find({publisher:socket.user._id})
 
+        if(socket.user.accountType === "agent"){
+          const connectedUser = await UsersModel.findOne({_id:socket.user._id},{userSocketConnectionId:0})
           socket.emit('socketConnected',connectedUser)
           console.log('connected successfully.')
-          console.log(`user socket ${connectedUser.userSocketConnectionId}`)
+
+          console.log(`user socket ${user.userSocketConnectionId}`)
+        }else{
+          const connectedUser = await UsersModel.findOne({_id:socket.user._id},{userSocketConnectionId:0,isAgentFileAlreadyUploaded:0,isAgentVerified:0, 'userProfile.publishingAs':0})
+          socket.emit('socketConnected',connectedUser)
+          console.log('connected successfully.')
+
+          console.log(`user socket ${user.userSocketConnectionId}`)
+        }
+
+        
          // console.log(await UsersModel.find())
 
 

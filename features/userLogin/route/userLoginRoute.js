@@ -1,5 +1,5 @@
 const authHandlerMiddleWare = require('../../../middleware/authHandlerMiddleWare')
-const { LoginUser, uploadAgentFileForVerification, verifyUserByToken, updateAgentProfile } = require('../controller/userLoginController')
+const { LoginUser, uploadAgentFileForVerification, verifyUserByToken, updateAgentProfile, updateCLientProfile } = require('../controller/userLoginController')
 
 
 
@@ -10,5 +10,6 @@ route.post('/verify-agent-documment',authHandlerMiddleWare,uploadAgentFileForVer
 route.get('/verify-token',authHandlerMiddleWare,verifyUserByToken)
 
 route.post('/update-agent-profile',authHandlerMiddleWare,updateAgentProfile)
+route.post('/update-client-profile',authHandlerMiddleWare,updateCLientProfile)
 
  module.exports = route

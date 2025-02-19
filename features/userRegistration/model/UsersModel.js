@@ -32,6 +32,7 @@ const moongoose = require('mongoose')
         type:String,
         default:''
       },
+
       timeCreated:{
         type:Date,
         default:null
@@ -44,6 +45,7 @@ const moongoose = require('mongoose')
         type:Boolean,
         default:false
       },
+
       userProfile:{
         firstName:{
           type:String,
@@ -92,8 +94,16 @@ const moongoose = require('mongoose')
        
         publishingAs:{
           type:String,
-          default:'Agent'
-        }
+          default:''
+        },
+
+        dob:{
+          type:String,
+          default:''
+        },
+
+       
+
       }
   })
 

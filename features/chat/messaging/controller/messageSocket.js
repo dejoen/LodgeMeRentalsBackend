@@ -111,7 +111,7 @@ const sendMessage = async (generalSocket, userSocket, data) => {
     }).populate('senderId')
     
     
-console.log(newMessages)
+//console.log(newMessages)
 
     userSocket.emit("message-sent", JSON.stringify(newMessages));
     generalSocket.to(receiver.userSocketConnectionId).emit("message-sent",JSON.stringify(newMessages))

@@ -62,12 +62,14 @@ module.exports = async (chatSocket) =>{
           console.log('connected successfully.')
 
           console.log(`user socket ${user.userSocketConnectionId}`)
+          console.log('agent connecting.....')
         }else{
           const connectedUser = await UsersModel.findOne({_id:socket.user._id},{userSocketConnectionId:0,isAgentFileAlreadyUploaded:0,isAgentVerified:0, 'userProfile.publishingAs':0})
           socket.emit('socketConnected',connectedUser)
           console.log('connected successfully.')
 
           console.log(`user socket ${user.userSocketConnectionId}`)
+          console.log('client connecting.....')
         }
 
         

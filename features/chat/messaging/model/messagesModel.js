@@ -13,6 +13,15 @@ const messagesSchema = new mongoose.Schema({
 
   messages:[
 {
+  senderId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref:'Users'
+  },
+
+  receiverId: {
+    type: mongoose.Schema.Types.ObjectId,
+     ref:'Users'
+  },
   messageType: {
     type: String
   },

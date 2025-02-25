@@ -48,10 +48,10 @@ const getMessages = async (req,res,next) => {
       const messages = await MessageModel.find({
         
         $or:[
-          {senderId:[user._id ],
+          {senderId:user._id,
             },
             {
-              receiverId:[user._id]
+              receiverId:user._id
             }
         ]
 

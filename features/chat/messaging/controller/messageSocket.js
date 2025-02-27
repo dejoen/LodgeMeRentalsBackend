@@ -16,7 +16,12 @@ module.exports = (generalSocket, userSocket) => {
   userSocket.on ('message-delivered', data => {
     // messageSent(generalSocket, userSocket);
   });
+
+userSocket.on('typing',data => {
+  sendIsTyping(generalSocket,userSocket,data)
+})
 };
+
 
 const sendMessage = async (generalSocket, userSocket, data) => {
   const message = JSON.parse (data);
@@ -184,5 +189,57 @@ const sendMessage = async (generalSocket, userSocket, data) => {
     console.log (err);
   }
 };
+
+const  sendIsTyping = async (generalSocket, userSocket, data) => {
+    
+  const d = JSON.parse (data);
+  try {
+    const receiverId = d.receiverId;
+    const senderId = userSocket.user._id;
+
+    const isRecieverIdValid = mongoose.Types.ObjectId.isValid (receiverId);
+
+    if (!isRecieverIdValid) {
+      userSocket.emit (
+        'message-failed',
+        JSON.stringify ({
+          message: 'invalid data provided.',
+        })
+      );
+      return;
+    }
+
+   
+
+    const receiver = await UsersModel.findOne ({_id:receiverId});
+
+    if (!receiver) {
+      userSocket.emit (
+        'message-failed',
+        JSON.stringify ({
+          message: 'invalid data provided.',
+        })
+      );
+      return;
+    }
+
+
+
+    generalSocket
+    .to (receiver.userSocketConnectionId)
+    .emit ('typing', JSON.stringify ({
+       senderId,
+       typing:d.typing
+    }));
+
+    
+
+    
+  } catch (err) {
+    console.log (err);
+  }
+
+
+}
 
 const messageSent = async (generalSocket, userSocket) => {};

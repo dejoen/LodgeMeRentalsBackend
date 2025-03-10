@@ -3,6 +3,7 @@ const MessageModel = require ('../model/messagesModel');
 const mongoose = require ('mongoose');
 const MessageType = require ('../../../../utils/MessageType.json');
 const UsersModel = require ('../../../userRegistration/model/UsersModel');
+const NotificationModel = require('../model/NotificationModel')
 
 module.exports = (generalSocket, userSocket) => {
   console.log ('called...now..');
@@ -138,7 +139,24 @@ const sendMessage = async (generalSocket, userSocket, data) => {
 
         userSocket.emit ('message-sent', JSON.stringify (newMessages));
          
+
+       let  notification = await new NotificationModel({
+          userId:receiverId,
+          notificationTitle:"New Message",
+          notificationBody:`You have a new message from ${receiver.userName ?? receiver.userProfile.firstName}`,
+          notificationType:'message',
+          sender:senderId,
+          notificationTime:Date.now()
+         }).save()
+          notification = await NotificationModel.find({
+            userId:receiver._id
+          })
+
+         generalSocket
+         .to (receiver.userSocketConnectionId)
+         .emit ('notification', JSON.stringify (notification));
        
+
 
         return;
       }
@@ -181,7 +199,21 @@ const sendMessage = async (generalSocket, userSocket, data) => {
       .emit ('message-sent', JSON.stringify (newMessages));
       
       userSocket.emit ('message-sent', JSON.stringify (newMessages));
+      
+      let  notification = await new NotificationModel({
+        userId:receiverId,
+        notificationTitle:"New Message",
+        notificationBody:`You have a new message from ${receiver.userName ?? receiver.userProfile.firstName}`,
+        notificationType:'message',
+        sender:senderId,
+        notificationTime:Date.now()
+       }).save()
+        notification = await NotificationModel.find({userId:receiver._id})
 
+       generalSocket
+       .to (receiver.userSocketConnectionId)
+       .emit ('notification', JSON.stringify (notification));
+    
      
     
     }

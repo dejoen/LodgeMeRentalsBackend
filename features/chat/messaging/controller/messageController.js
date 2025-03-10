@@ -2,6 +2,7 @@
   const { default: mongoose } = require("mongoose")
 const MessageModel = require("../model/messagesModel")
 const UserModel = require("../../../userRegistration/model/UsersModel")
+const NotificationModel = require("../model/NotificationModel")
 
 const getMessages = async (req,res,next) => {
 
@@ -72,5 +73,30 @@ const getMessages = async (req,res,next) => {
     
 }
 
+const getUserNotifications = async (req,res) => {
+  
+  const  user = req.user 
+  if(!user){
+    res.status(500).json({
+        title:"Messages of  user ",
+        status:500,
+        successfull:false,
+        message:"Server error please try again"
+    })
+    return
+}
 
-module.exports = {getMessages}
+const notifications = await NotificationModel.find({userId:user._id})
+
+res.status(200).json({
+  title:"User Notification Message ",
+  status:200,
+  successfull:true,
+  message:"Succesfully fetched.",
+  data:notifications
+})
+   
+}
+
+
+module.exports = {getMessages,getUserNotifications}

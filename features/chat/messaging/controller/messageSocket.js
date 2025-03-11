@@ -143,7 +143,7 @@ const sendMessage = async (generalSocket, userSocket, data) => {
        let  notification = await new NotificationModel({
           userId:receiverId,
           notificationTitle:"New Message",
-          notificationBody:`You have a new message from ${receiver.userName ?? receiver.userProfile.firstName}`,
+          notificationBody:`You have a new message from ${userSocket.user.userName ?? userSocket.user.userProfile.firstName}`,
           notificationType:'message',
           sender:senderId,
           notificationTime:Date.now()

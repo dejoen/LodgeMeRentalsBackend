@@ -3,6 +3,7 @@ const MessageModel = require("../model/messagesModel");
 const mongoose = require("mongoose");
 const MessageType = require("../../../../utils/MessageType.json");
 const UsersModel = require("../../../userRegistration/model/UsersModel");
+const NotificationModel = require("../model/NotificationModel");
 
 module.exports = (generalSocket, userSocket) => {
   console.log("called...now..");
@@ -12,6 +13,10 @@ module.exports = (generalSocket, userSocket) => {
 
   userSocket.on("message-sent", (data) => {
     // messageSent(generalSocket, userSocket);
+  });
+
+  userSocket.on("typing", (data) => {
+    sendIsTyping(generalSocket, userSocket, data);
   });
 };
 
@@ -165,6 +170,48 @@ const sendMessage = async (generalSocket, userSocket, data) => {
         .to(receiver.userSocketConnectionId)
         .emit("message-sent", userMessages);
     }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const sendIsTyping = async (generalSocket, userSocket, data) => {
+  const d = JSON.parse(data);
+  try {
+    const receiverId = d.receiverId;
+    const senderId = userSocket.user._id;
+
+    const isRecieverIdValid = mongoose.Types.ObjectId.isValid(receiverId);
+
+    if (!isRecieverIdValid) {
+      userSocket.emit(
+        "message-failed",
+        JSON.stringify({
+          message: "invalid data provided.",
+        }),
+      );
+      return;
+    }
+
+    const receiver = await UsersModel.findOne({ _id: receiverId });
+
+    if (!receiver) {
+      userSocket.emit(
+        "message-failed",
+        JSON.stringify({
+          message: "invalid data provided.",
+        }),
+      );
+      return;
+    }
+
+    generalSocket.to(receiver.userSocketConnectionId).emit(
+      "typing",
+      JSON.stringify({
+        senderId,
+        typing: d.typing,
+      }),
+    );
   } catch (err) {
     console.log(err);
   }

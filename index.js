@@ -14,6 +14,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
   },
 });
+
 const chatSocket = io.of("/chat");
 
 require("./features/chat/socketInitialization")(chatSocket);

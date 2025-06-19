@@ -1,68 +1,45 @@
+const { default: mongoose } = require("mongoose");
+const MessageModel = require("../model/messagesModel");
+const UserModel = require("../../../userRegistration/model/UsersModel");
 
-  const { default: mongoose } = require("mongoose")
-const MessageModel = require("../model/messagesModel")
-const UserModel = require("../../../userRegistration/model/UsersModel")
+const getMessages = async (req, res, next) => {
+  console.log("called me...");
 
-const getMessages = async (req,res,next) => {
+  const user = req.user;
 
-    console.log("called me...")
+  if (!user) {
+    res.status(500).json({
+      title: "Messages of  user ",
+      status: 500,
+      successfull: false,
+      message: "Server error please try again",
+    });
+    return;
+  }
 
-    const  user = req.user 
+  const messages = await MessageModel.find({
+    $or: [
+      {
+        sender: user._id,
+      },
+      {
+        receiver: user._id,
+      },
+    ],
+  })
+    .populate(
+      "messages.receiver messages.sender sender receiver",
+      "userProfile.firstName userProfile.lastName userProfile.profileImage userName isOnline",
+    )
+    .sort("updatedAt");
 
-    const  personUserChatted = req.body.receiverId
+  res.status(200).json({
+    title: "Messages of  user ",
+    status: 200,
+    successfull: true,
+    message: "Succesfully fetched.",
+    userMessages: messages,
+  });
+};
 
-    if(!user){
-        res.status(500).json({
-            title:"Messages of  user ",
-            status:500,
-            successfull:false,
-            message:"Server error please try again"
-        })
-        return
-    }
-    
-    const isReceiverIdValid = mongoose.Types.ObjectId.isValid(personUserChatted)
-
-    if(!isReceiverIdValid){
-        res.status(400).json({
-            title:"Messages of  user ",
-            status:400,
-            successfull:false,
-            message:"Invalid receiverId provided."
-        })
-        return
-    }
-
-     const authenticatedReceiver = await UserModel.findOne({_id:personUserChatted})
-
-      if(!authenticatedReceiver){
-        res.status(400).json({
-            title:"Messages of  user ",
-            status:400,
-            successfull:false,
-            message:"Invalid receiverId provided."
-        })
-        return
-      }
-
-      const messages = await MessageModel.find({
-        sender:[user._id || personUserChatted],
-        receiver:[personUserChatted || user._id]
-      })
-
-
-      res.status(200).json({
-        title:"Messages of  user ",
-        status:200,
-        successfull:true,
-        message:"Succesfully fetched.",
-        messages
-      })
-
-
-
-    
-}
-
-
-module.exports = {getMessages}
+module.exports = { getMessages };

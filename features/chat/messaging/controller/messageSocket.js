@@ -6,13 +6,12 @@ const UsersModel = require("../../../userRegistration/model/UsersModel");
 
 module.exports = (generalSocket, userSocket) => {
   console.log("called...now..");
-  userSocket.on("send-message", data => {
-   
+  userSocket.on("send-message", (data) => {
     sendMessage(generalSocket, userSocket, data);
   });
 
-  userSocket.on("message-sent", data => {
-   // messageSent(generalSocket, userSocket);
+  userSocket.on("message-sent", (data) => {
+    // messageSent(generalSocket, userSocket);
   });
 };
 
@@ -27,63 +26,148 @@ const sendMessage = async (generalSocket, userSocket, data) => {
 
     const isRecieverIdValid = mongoose.Types.ObjectId.isValid(receiverId);
 
-    if(!isRecieverIdValid){
-      userSocket.emit("message-failed",JSON.stringify({
-            message:"invalid data provided."
-      }))
-      return
+    if (!isRecieverIdValid) {
+      userSocket.emit(
+        "message-failed",
+        JSON.stringify({
+          message: "invalid data provided.",
+        }),
+      );
+      return;
     }
 
+    const isMessageTypeValid = Object.entries(MessageType).find(
+      (data, index) => {
+        return data[1] === message.type;
+      },
+    );
 
-    const isMessageTypeValid = Object.entries(MessageType).find((data, index) => {
-      
-      return data[1] === message.type
-    });
-
-    if(!isMessageTypeValid){
-      userSocket.emit("message-failed",JSON.stringify({
-            message:"invalid data provided."
-      }))
-      return
-    }
-    
-    const receiver = await UsersModel.findOne({_id:receiverId})
-
-    if(!receiver){
-      userSocket.emit("message-failed",JSON.stringify({
-            message:"invalid data provided."
-      }))
-      return
+    if (!isMessageTypeValid) {
+      userSocket.emit(
+        "message-failed",
+        JSON.stringify({
+          message: "invalid data provided.",
+        }),
+      );
+      return;
     }
 
-      if(MessageType.TEXT === messageType){
+    const receiver = await UsersModel.findOne({ _id: receiverId });
 
-     await new MessageModel({
-      sender:senderId,
-      receiver:receiverId,
-      messageType:messageType,
-      text:messageData,
-      timeSent:timeStamp
-    }).save()
+    if (!receiver) {
+      userSocket.emit(
+        "message-failed",
+        JSON.stringify({
+          message: "invalid data provided.",
+        }),
+      );
+      return;
+    }
+    console.log(message);
+    if (MessageType.TEXT === messageType) {
+      /**
+       * find message model were users are either receiver or sender
+       */
+      const messageModel = await MessageModel.findOne({
+        $and: [
+          {
+            $or: [
+              {
+                sender: senderId,
+              },
+              {
+                sender: receiverId,
+              },
+            ],
+          },
+          {
+            $or: [
+              {
+                receiver: senderId,
+              },
+              {
+                receiver: receiverId,
+              },
+            ],
+          },
+        ],
+      });
 
-     
-    const messages = await MessageModel.find({
-      sender:[senderId || receiverId],
-      receiver:[receiverId || senderId]
-    })
-    
+      console.log(messageModel);
+      if (messageModel) {
+        const updatedMessages = messageModel.messages;
 
+        updatedMessages.push({
+          sender: senderId,
+          receiver: receiverId,
+          messageType: messageType,
+          text: messageData,
+          timeSent: timeStamp,
+        });
 
-    userSocket.emit("message-sent", JSON.stringify(messages));
-    generalSocket(receiver.userSocketConnectionId).emit("message-sent",JSON.stringify(messages))
-}
+        await messageModel.updateOne({ messages: updatedMessages });
 
+        const messages = await MessageModel.find({
+          $or: [
+            {
+              sender: senderId,
+            },
+            {
+              receiver: senderId,
+            },
+          ],
+        })
+          .populate(
+            "messages.receiver messages.sender sender receiver",
+            "userProfile.firstName userProfile.lastName userProfile.profileImage userName isOnline",
+          )
+          .sort("updatedAt");
 
+        userSocket.emit("message-sent", messages);
+        generalSocket
+          .to(receiver.userSocketConnectionId)
+          .emit("message-sent", messages);
+        return;
+      }
+
+      await new MessageModel({
+        sender: senderId,
+        receiver: receiverId,
+        messages: [
+          {
+            sender: senderId,
+            receiver: receiverId,
+            messageType: messageType,
+            text: messageData,
+            timeSent: timeStamp,
+          },
+        ],
+      }).save();
+
+      const userMessages = await MessageModel.find({
+        $or: [
+          {
+            sender: senderId,
+          },
+          {
+            receiver: senderId,
+          },
+        ],
+      })
+        .populate(
+          "messages.receiver messages.sender sender receiver",
+          "userProfile.firstName userProfile.lastName userProfile.profileImage userName isOnline",
+        )
+        .sort("updatedAt");
+
+      userSocket.emit("message-sent", userMessages);
+      generalSocket
+        .to(receiver.userSocketConnectionId)
+        .emit("message-sent", userMessages);
+    }
   } catch (err) {
     console.log(err);
   }
-
-  
 };
 
 const messageSent = async (generalSocket, userSocket) => {};

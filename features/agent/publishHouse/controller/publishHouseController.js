@@ -2,7 +2,6 @@ const publishHouseModel = require("../model/publishHouseModel");
 
 const uploadPublishHouseData = require("../../../../utils/publishHouseFile");
 
-
 const { uid } = require("uid");
 const mongoose = require("mongoose");
 const lodgeUploadId = uid();
@@ -10,20 +9,15 @@ const lodgeUploadId = uid();
 const publishHouse = async (req, res, next) => {
   const user = req.user;
   console.log(req.body);
-  const {
-    houseOverview,
-    aboutHouse,
-    houseFeatures,
-    mediaUpload,
-    rentalPrice
-  } = req.body;
+  const { houseOverview, aboutHouse, houseFeatures, mediaUpload, rentalPrice } =
+    req.body;
 
   if (!user) {
     res.status(401).json({
       title: "Publish House Message",
       status: 401,
       successfull: false,
-      message: "You are not authorized to continue."
+      message: "You are not authorized to continue.",
     });
     return;
   }
@@ -41,7 +35,7 @@ const publishHouse = async (req, res, next) => {
         status: 400,
         successfull: false,
         message:
-          "houseOverview, aboutHouse,houseFeatures, mediaUpload, rentalPrice fields is needed to continue."
+          "houseOverview, aboutHouse,houseFeatures, mediaUpload, rentalPrice fields is needed to continue.",
       });
 
       return;
@@ -58,7 +52,7 @@ const publishHouse = async (req, res, next) => {
         title: "Publish House Message",
         status: 400,
         successfull: false,
-        message: "Json format is needed to parse data."
+        message: "Json format is needed to parse data.",
       });
 
       return;
@@ -70,7 +64,7 @@ const publishHouse = async (req, res, next) => {
         status: 400,
         successfull: false,
         message:
-          " houseName,houseAddress,houseType,state,localGovtArea fields are required in house feature object."
+          " houseName,houseAddress,houseType,state,localGovtArea fields are required in house feature object.",
       });
       return;
     }
@@ -80,7 +74,7 @@ const publishHouse = async (req, res, next) => {
         title: "Publish House Message",
         status: 400,
         successfull: false,
-        message: "description field is required in aboutHouse object."
+        message: "description field is required in aboutHouse object.",
       });
       return;
     }
@@ -91,7 +85,7 @@ const publishHouse = async (req, res, next) => {
         status: 400,
         successfull: false,
         message:
-          "  totalNumberOfBedRooms,totalNumberOfToilets,houseFenced,runningWater,prepaidMeter,smartHomeFeatures,laundryRoom,airConditioning,parkingSpace,garbageDisposalService,adequateLigting,storageSpace,petFriendly,emergencyExits,secureWindowsAndDoors,securitySystems,backyardGardenOrBalcony,swimmingPoolGym,Gym, maintenanceSupport,safePlayAreaForChildren fields are needed for houseFeatures object."
+          "  totalNumberOfBedRooms,totalNumberOfToilets,houseFenced,runningWater,prepaidMeter,smartHomeFeatures,laundryRoom,airConditioning,parkingSpace,garbageDisposalService,adequateLigting,storageSpace,petFriendly,emergencyExits,secureWindowsAndDoors,securitySystems,backyardGardenOrBalcony,swimmingPoolGym,Gym, maintenanceSupport,safePlayAreaForChildren fields are needed for houseFeatures object.",
       });
       return;
     }
@@ -102,7 +96,7 @@ const publishHouse = async (req, res, next) => {
         status: 400,
         successfull: false,
         message:
-          "houseImagesBase64, houseVideosbase64 fields are needed object."
+          "houseImagesBase64, houseVideosbase64 fields are needed object.",
       });
       return;
     }
@@ -113,7 +107,7 @@ const publishHouse = async (req, res, next) => {
         status: 400,
         successfull: false,
         message:
-          "base64 string is required for image upload in mediaUpload object"
+          "base64 string is required for image upload in mediaUpload object",
       });
       return;
     }
@@ -124,14 +118,14 @@ const publishHouse = async (req, res, next) => {
         status: 400,
         successfull: false,
         message:
-          " monthlyOrYearlyRent,securityDeposit,applicationFee,maintenanceFee,petFees,rentalTerm,cleaningServices,totalDue  fields are needed in rentalPrice object."
+          " monthlyOrYearlyRent,securityDeposit,applicationFee,maintenanceFee,petFees,rentalTerm,cleaningServices,totalDue  fields are needed in rentalPrice object.",
       });
       return;
     }
 
     const mediaRefUrl = await uploadAllData(
       [mediaUpload.houseImagesBase64, mediaUpload.houseVideosbase64],
-      user._id
+      user._id,
     );
 
     const publishHouse = new publishHouseModel({
@@ -141,7 +135,7 @@ const publishHouse = async (req, res, next) => {
       aboutHouse,
       houseFeatures,
       mediaUpload: mediaRefUrl,
-      rentalPrice
+      rentalPrice,
     });
 
     await publishHouse.save();
@@ -151,7 +145,7 @@ const publishHouse = async (req, res, next) => {
       status: 200,
       successfull: "true",
       message: "successfully published a house.",
-      publishHouse
+      publishHouse,
     });
   } catch (err) {
     next(err);
@@ -160,8 +154,15 @@ const publishHouse = async (req, res, next) => {
 
 const getAllPublishedHouses = async (req, res, next) => {
   try {
-    const houses = await publishHouseModel.find().populate('publisher',['userName','userProfile','isOnline','timeCreated'
-    ]).sort({ datePublished: -1 });
+    const houses = await publishHouseModel
+      .find()
+      .populate("publisher", [
+        "userName",
+        "userProfile",
+        "isOnline",
+        "timeCreated",
+      ])
+      .sort({ datePublished: -1 });
 
     res.status(200).json({
       title: "All Houses Published Message.",
@@ -169,7 +170,7 @@ const getAllPublishedHouses = async (req, res, next) => {
       successfull: true,
       message: "successfully fetched.",
       totalHousesPublished: houses.length,
-      housesPublished: houses
+      housesPublished: houses,
     });
   } catch (err) {
     res.status(500).json({
@@ -177,18 +178,10 @@ const getAllPublishedHouses = async (req, res, next) => {
       status: 500,
       successfull: false,
       message: "An error occurred",
-      error: err.message
+      error: err.message,
     });
   }
 };
-
-
-
-
-
-
-
-
 
 const getHousesPublishedByAgent = async (req, res, next) => {
   const { publisherId } = req.body;
@@ -198,7 +191,7 @@ const getHousesPublishedByAgent = async (req, res, next) => {
         title: "Get Published Houses By Agent Message.",
         status: 400,
         successfull: false,
-        message: "publisherId field is required to continue process."
+        message: "publisherId field is required to continue process.",
       });
 
       return;
@@ -211,7 +204,7 @@ const getHousesPublishedByAgent = async (req, res, next) => {
         title: "Get Published Houses By Agent Message.",
         status: 400,
         successfull: false,
-        message: "publisherId is invalid."
+        message: "publisherId is invalid.",
       });
 
       return;
@@ -227,7 +220,7 @@ const getHousesPublishedByAgent = async (req, res, next) => {
       successfull: true,
       message: "successfully fetched.",
       totalHousesPublished: houses.length,
-      housesPublished: houses
+      housesPublished: houses,
     });
   } catch (err) {
     res.status(500).json({
@@ -235,16 +228,17 @@ const getHousesPublishedByAgent = async (req, res, next) => {
       status: 500,
       successfull: false,
       message: "An error occurred",
-      error: err.message
+      error: err.message,
     });
   }
 };
 
-const checkIfDataIsBase64 = data => {
-  var regexBase64 = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+const checkIfDataIsBase64 = (data) => {
+  var regexBase64 =
+    /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
-  const isBase64 = Object.values(data).some(value => {
-    const result = Object.values(value).some(data => {
+  const isBase64 = Object.values(data).some((value) => {
+    const result = Object.values(value).some((data) => {
       return regexBase64.test(data.fileData);
     });
 
@@ -254,12 +248,12 @@ const checkIfDataIsBase64 = data => {
   return isBase64;
 };
 
-const isDataIsNull = data => {
+const isDataIsNull = (data) => {
   if (Object.keys(data).length === 0) {
     return true;
   }
 
-  const result = Object.values(data).some(value => {
+  const result = Object.values(data).some((value) => {
     return (
       value === null || value === undefined || value === "" || value === " "
     );
@@ -272,15 +266,15 @@ const uploadAllData = async (data, userId) => {
   const promises = [];
 
   data.forEach((element, index) => {
-    element.forEach(result => {
+    element.forEach((result) => {
       if (index === 0) {
         promises.push(
           uploadPublishHouseData(
             result.fileData,
             `images/${userId}/${lodgeUploadId}/${uid(16)}.jpeg`,
             "image",
-            lodgeUploadId
-          )
+            lodgeUploadId,
+          ),
         );
       } else {
         promises.push(
@@ -288,8 +282,8 @@ const uploadAllData = async (data, userId) => {
             result.fileData,
             `videos/${userId}/${lodgeUploadId}/${uid(16)}.mp4`,
             "video",
-            lodgeUploadId
-          )
+            lodgeUploadId,
+          ),
         );
       }
     });
@@ -298,4 +292,8 @@ const uploadAllData = async (data, userId) => {
   return Promise.all(promises);
 };
 
-module.exports = { publishHouse, getAllPublishedHouses,getHousesPublishedByAgent };
+module.exports = {
+  publishHouse,
+  getAllPublishedHouses,
+  getHousesPublishedByAgent,
+};

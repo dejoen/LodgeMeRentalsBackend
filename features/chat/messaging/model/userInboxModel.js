@@ -1,32 +1,29 @@
 const mongoose = require("mongoose");
 
-const userInboxSchema =  new mongoose.Schema({
-    
-    owner:{
-        type:mongoose.Schema.Types.ObjectId,
-        unique:[true,"inbox owner should be unique."]
-    },
-    userInboxData:[
+const userInboxSchema = new mongoose.Schema({
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    unique: [true, "inbox owner should be unique."],
+  },
+  userInboxData: [
+    {
+      sender: {
+        type: mongoose.Schema.Types.ObjectId,
+        unique: [true, "sender should be unique"],
+      },
+
+      messages: [
         {
-            sender:{
-                type:mongoose.Schema.Types.ObjectId,
-                unique:[true,'sender should be unique']
-            },
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Messages",
+        },
+      ],
 
-            messages:[
-             {
-                type:mongoose.Schema.Types.ObjectId,
-                ref:"Messages"
-             },
+      notificationOfUnreadMessages: {
+        type: mongoose.Schema.Types.Number,
+      },
+    },
+  ],
+});
 
-     
-            ],
-
-            notificationOfUnreadMessages :{
-                type:mongoose.Schema.Types.Number
-             }
-        }
-    ]
-})
-
-module.exports =  mongoose.model("UserIbox",userInboxSchema)
+module.exports = mongoose.model("UserIbox", userInboxSchema);
